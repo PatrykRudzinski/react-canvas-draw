@@ -100,6 +100,7 @@ export default class extends PureComponent {
   }
 
   componentDidMount() {
+    alert('testy')
     this.lazy = new LazyBrush({
       radius: this.props.lazyRadius * window.devicePixelRatio,
       enabled: true,
