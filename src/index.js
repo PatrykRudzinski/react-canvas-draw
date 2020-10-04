@@ -160,7 +160,8 @@ export default class extends PureComponent {
       (this.props.canvasWidth !== prevProps.canvasWidth || this.props.canvasHeight !== prevProps.canvasHeight)
       && this.canvasContainer
     ) {
-        this.handleCanvasResize(this.canvasContainer)
+      // this.handleCanvasResize(this.canvasContainer)
+      console.log(this.canvasContainer);
     }
   }
 
@@ -325,6 +326,7 @@ export default class extends PureComponent {
   };
 
   handleCanvasResize = (entries, observer) => {
+    console.log(entries);
     const saveData = this.getSaveData();
     for (const entry of entries) {
       const { width, height } = entry.contentRect;
