@@ -155,6 +155,13 @@ export default class extends PureComponent {
       // Signal this.loop function that values changed
       this.valuesChanged = true;
     }
+
+    if(
+      (this.props.canvasWidth !== prevProps.canvasWidth || this.props.canvasHeight !== prevProps.canvasHeight)
+      && this.canvasContainer
+    ) {
+        this.handleCanvasResize(this.canvasContainer)
+    }
   }
 
   componentWillUnmount = () => {
@@ -209,7 +216,7 @@ export default class extends PureComponent {
       width === this.props.canvasWidth &&
       height === this.props.canvasHeight
     ) {
-      this.simulateDrawingLines({
+      return this.simulateDrawingLines({
         lines,
         immediate
       });
@@ -219,7 +226,7 @@ export default class extends PureComponent {
       const scaleY = this.props.canvasHeight / height;
       const scaleAvg = (scaleX + scaleY) / 2;
 
-      this.simulateDrawingLines({
+      return this.simulateDrawingLines({
         lines: lines.map(line => ({
           ...line,
           points: line.points.map(p => ({
@@ -239,42 +246,45 @@ export default class extends PureComponent {
     let curTime = 0;
     let timeoutGap = immediate ? 0 : this.props.loadTimeOffset;
 
-    lines.forEach(line => {
-      const { points, brushColor, brushRadius } = line;
+    return new Promise(resolve => {
+      lines.forEach(line => {
+        const {points, brushColor, brushRadius} = line;
 
-      // Draw all at once if immediate flag is set, instead of using setTimeout
-      if (immediate) {
-        // Draw the points
-        this.drawPoints({
-          points,
-          brushColor,
-          brushRadius
-        });
-
-        // Save line with the drawn points
-        this.points = points;
-        this.saveLine({ brushColor, brushRadius });
-        return;
-      }
-
-      // Use timeout to draw
-      for (let i = 1; i < points.length; i++) {
-        curTime += timeoutGap;
-        window.setTimeout(() => {
+        // Draw all at once if immediate flag is set, instead of using setTimeout
+        if (immediate) {
+          // Draw the points
           this.drawPoints({
-            points: points.slice(0, i + 1),
+            points,
             brushColor,
             brushRadius
           });
-        }, curTime);
-      }
 
-      curTime += timeoutGap;
-      window.setTimeout(() => {
-        // Save this line with its props instead of this.props
-        this.points = points;
-        this.saveLine({ brushColor, brushRadius });
-      }, curTime);
+          // Save line with the drawn points
+          this.points = points;
+          this.saveLine({brushColor, brushRadius});
+          return;
+        }
+
+        // Use timeout to draw
+        for (let i = 1; i < points.length; i++) {
+          curTime += timeoutGap;
+          window.setTimeout(() => {
+            this.drawPoints({
+              points: points.slice(0, i + 1),
+              brushColor,
+              brushRadius
+            });
+          }, curTime);
+        }
+
+        curTime += timeoutGap;
+        window.setTimeout(() => {
+          // Save this line with its props instead of this.props
+          this.points = points;
+          this.saveLine({brushColor, brushRadius});
+          resolve(this.points);
+        }, curTime);
+      });
     });
   };
 
