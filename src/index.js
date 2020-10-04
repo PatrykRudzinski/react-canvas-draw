@@ -161,7 +161,7 @@ export default class extends PureComponent {
       && this.canvasContainer
     ) {
       // this.handleCanvasResize(this.canvasContainer)
-      console.log(this.canvasContainer);
+      console.log(this.canvasObserver);
     }
   }
 
@@ -326,6 +326,7 @@ export default class extends PureComponent {
   };
 
   handleCanvasResize = (entries, observer) => {
+    console.log('=====entries=====');
     console.log(entries);
     const saveData = this.getSaveData();
     for (const entry of entries) {
