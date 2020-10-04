@@ -9,7 +9,7 @@ class Demo extends Component {
     color: "#ffc600",
     width: 400,
     height: 400,
-    brushRadius: 10,
+    brushRadius: 1,
     lazyRadius: 12
   };
   componentDidMount() {
@@ -19,7 +19,13 @@ class Demo extends Component {
         color: "#" + Math.floor(Math.random() * 16777215).toString(16)
       });
     }, 2000);
+    window.addEventListener('resize', this.updateWidth)
   }
+
+  updateWidth = ({ target }) => {
+    this.setState({ width: target.innerWidth / 2})
+  }
+
   render() {
     return (
       <div>
@@ -38,7 +44,7 @@ class Demo extends Component {
           default values.
         </p>
         <p>Try it out! Draw on this white canvas:</p>
-        <CanvasDraw onChange={() => console.log("onChange")} />
+        <CanvasDraw canvasWidth={this.state.width} />
         <h2>Custom Brush-Color</h2>
         <p>
           Let's spice things up by using custom brush colors{" "}

@@ -97,6 +97,8 @@ export default class extends PureComponent {
     this.valuesChanged = true;
     this.isDrawing = false;
     this.isPressing = false;
+    this.canvasWidth = null;
+    this.canvasHeight = null;
   }
 
   componentDidMount() {
@@ -155,13 +157,6 @@ export default class extends PureComponent {
       // Signal this.loop function that values changed
       this.valuesChanged = true;
     }
-
-    if(
-      (this.props.canvasWidth !== prevProps.canvasWidth || this.props.canvasHeight !== prevProps.canvasHeight)
-      && this.canvasContainer
-    ) {
-      // this.handleCanvasResize(this.canvasContainer)
-    }
   }
 
   componentWillUnmount = () => {
@@ -213,18 +208,23 @@ export default class extends PureComponent {
     this.clear();
 
     if (
-      width === this.props.canvasWidth &&
-      height === this.props.canvasHeight
+      width === this.canvasWidth &&
+      height === this.canvasHeight
     ) {
+      this.canvasWidth = this.props.canvasWidth
+      this.canvasHeight = this.props.canvasHeight
       return this.simulateDrawingLines({
         lines,
         immediate
       });
     } else {
       // we need to rescale the lines based on saved & current dimensions
-      const scaleX = this.props.canvasWidth / width;
-      const scaleY = this.props.canvasHeight / height;
+      const scaleX = width / this.canvasWidth;
+      const scaleY = height / this.canvasHeight;
       const scaleAvg = (scaleX + scaleY) / 2;
+
+      this.canvasWidth = this.props.canvasWidth
+      this.canvasHeight = this.props.canvasHeight
 
       return this.simulateDrawingLines({
         lines: lines.map(line => ({
@@ -325,13 +325,9 @@ export default class extends PureComponent {
   };
 
   handleCanvasResize = (entries, observer) => {
-    console.log('=====entries=====');
-    console.log(entries);
     const saveData = this.getSaveData();
     for (const entry of entries) {
       const { width, height } = entry.contentRect;
-      console.log({width})
-      console.log({height})
       this.setCanvasSize(this.canvas.interface, width, height);
       this.setCanvasSize(this.canvas.drawing, width, height);
       this.setCanvasSize(this.canvas.temp, width, height);
