@@ -97,8 +97,8 @@ export default class extends PureComponent {
     this.valuesChanged = true;
     this.isDrawing = false;
     this.isPressing = false;
-    this.canvasWidth = null;
-    this.canvasHeight = null;
+    this.canvasWidth = this.props.canvasWidth;
+    this.canvasHeight = this.props.canvasHeight;
   }
 
   componentDidMount() {
