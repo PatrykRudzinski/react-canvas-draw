@@ -182,7 +182,6 @@ export default class extends PureComponent {
     const lines = this.lines.slice(0, -1);
     this.clear();
     this.simulateDrawingLines({ lines, immediate: true });
-    this.triggerOnChange();
   };
 
   getSaveData = () => {
