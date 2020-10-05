@@ -181,7 +181,7 @@ export default class extends PureComponent {
   undo = () => {
     const lines = this.lines.slice(0, -1);
     this.clear();
-    this.simulateDrawingLines({ lines, immediate: true });
+    this.simulateDrawingLines({ lines, immediate: true, abortOnChange: true });
   };
 
   getSaveData = () => {
@@ -218,7 +218,7 @@ export default class extends PureComponent {
       this.updateDimension();
       return this.simulateDrawingLines({
         lines,
-        immediate
+        immediate,
       });
     } else {
       // we need to rescale the lines based on saved & current dimensions
@@ -236,12 +236,12 @@ export default class extends PureComponent {
           })),
           brushRadius: line.brushRadius * scaleAvg
         })),
-        immediate
+        immediate,
       });
     }
   };
 
-  simulateDrawingLines = ({ lines, immediate }) => {
+  simulateDrawingLines = ({ lines, immediate, abortOnChange }) => {
     // Simulate live-drawing of the loaded lines
     // TODO use a generator
     let curTime = 0;
@@ -261,7 +261,7 @@ export default class extends PureComponent {
 
         // Save line with the drawn points
         this.points = points;
-        this.saveLine({brushColor, brushRadius});
+        this.saveLine({brushColor, brushRadius, abortOnChange});
         return;
       }
 
@@ -281,7 +281,7 @@ export default class extends PureComponent {
       window.setTimeout(() => {
         // Save this line with its props instead of this.props
         this.points = points;
-        this.saveLine({brushColor, brushRadius, abortOnChange: true});
+        this.saveLine({brushColor, brushRadius, abortOnChange: true });
       }, curTime);
     });
   };

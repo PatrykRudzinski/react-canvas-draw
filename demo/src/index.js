@@ -26,6 +26,10 @@ class Demo extends Component {
     this.setState({ width: target.innerWidth / 2})
   }
 
+  onChange = () => {
+    console.log('onChange')
+  }
+
   render() {
     return (
       <div>
@@ -160,6 +164,7 @@ class Demo extends Component {
           lazyRadius={this.state.lazyRadius}
           canvasWidth={this.state.width}
           canvasHeight={this.state.height}
+          onChange={this.onChange}
         />
         <p>
           The following is a disabled canvas with a hidden grid that we use to
