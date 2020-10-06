@@ -305,7 +305,8 @@ export default class extends PureComponent {
 
   handleDrawMove = e => {
     e.preventDefault();
-
+    console.log('getPointerPos')
+    console.log(this.getPointerPos(e));
     const { x, y } = this.getPointerPos(e);
     this.handlePointerMove(x, y);
   };
@@ -396,6 +397,8 @@ export default class extends PureComponent {
   };
 
   drawPoints = ({ points, brushColor, brushRadius }) => {
+    console.log('points')
+    console.log(points)
     this.ctx.temp.lineJoin = "round";
     this.ctx.temp.lineCap = "round";
     this.ctx.temp.strokeStyle = brushColor;
