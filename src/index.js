@@ -88,7 +88,10 @@ export default class extends PureComponent {
     this.canvas = {};
     this.ctx = {};
 
-    this.catenary = new Catenary();
+    this.catenary = new Catenary({
+      segments: 20,
+      iterationLimit: 40,
+    });
 
     this.points = [];
     this.lines = [];
@@ -97,12 +100,15 @@ export default class extends PureComponent {
     this.valuesChanged = true;
     this.isDrawing = false;
     this.isPressing = false;
+    this.canvasWidth = this.props.canvasWidth;
+    this.canvasHeight = this.props.canvasHeight;
   }
 
   componentDidMount() {
+    console.log('canvas ready')
     this.lazy = new LazyBrush({
       radius: this.props.lazyRadius * window.devicePixelRatio,
-      enabled: true,
+      enabled: false,
       initialPoint: {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2
@@ -179,8 +185,7 @@ export default class extends PureComponent {
   undo = () => {
     const lines = this.lines.slice(0, -1);
     this.clear();
-    this.simulateDrawingLines({ lines, immediate: true });
-    this.triggerOnChange();
+    this.simulateDrawingLines({ lines, immediate: true, abortOnChange: true });
   };
 
   getSaveData = () => {
@@ -191,6 +196,11 @@ export default class extends PureComponent {
       height: this.props.canvasHeight
     });
   };
+
+  updateDimension = () => {
+    this.canvasWidth = this.props.canvasWidth
+    this.canvasHeight = this.props.canvasHeight
+  }
 
   loadSaveData = (saveData, immediate = this.props.immediateLoading) => {
     if (typeof saveData !== "string") {
@@ -206,19 +216,21 @@ export default class extends PureComponent {
     this.clear();
 
     if (
-      width === this.props.canvasWidth &&
-      height === this.props.canvasHeight
+      width === this.canvasWidth &&
+      height === this.canvasHeight
     ) {
-      this.simulateDrawingLines({
+      this.updateDimension();
+      return this.simulateDrawingLines({
         lines,
-        immediate
+        immediate,
       });
     } else {
       // we need to rescale the lines based on saved & current dimensions
-      const scaleX = this.props.canvasWidth / width;
-      const scaleY = this.props.canvasHeight / height;
+      const scaleX = width / this.canvasWidth;
+      const scaleY = height / this.canvasHeight;
       const scaleAvg = (scaleX + scaleY) / 2;
 
+      this.updateDimension();
       this.simulateDrawingLines({
         lines: lines.map(line => ({
           ...line,
@@ -228,19 +240,19 @@ export default class extends PureComponent {
           })),
           brushRadius: line.brushRadius * scaleAvg
         })),
-        immediate
+        immediate,
       });
     }
   };
 
-  simulateDrawingLines = ({ lines, immediate }) => {
+  simulateDrawingLines = ({ lines, immediate, abortOnChange }) => {
     // Simulate live-drawing of the loaded lines
     // TODO use a generator
     let curTime = 0;
     let timeoutGap = immediate ? 0 : this.props.loadTimeOffset;
 
     lines.forEach(line => {
-      const { points, brushColor, brushRadius } = line;
+      const {points, brushColor, brushRadius} = line;
 
       // Draw all at once if immediate flag is set, instead of using setTimeout
       if (immediate) {
@@ -253,7 +265,7 @@ export default class extends PureComponent {
 
         // Save line with the drawn points
         this.points = points;
-        this.saveLine({ brushColor, brushRadius });
+        this.saveLine({brushColor, brushRadius, abortOnChange});
         return;
       }
 
@@ -273,7 +285,7 @@ export default class extends PureComponent {
       window.setTimeout(() => {
         // Save this line with its props instead of this.props
         this.points = points;
-        this.saveLine({ brushColor, brushRadius });
+        this.saveLine({brushColor, brushRadius, abortOnChange: true });
       }, curTime);
     });
   };
@@ -297,7 +309,6 @@ export default class extends PureComponent {
 
   handleDrawMove = e => {
     e.preventDefault();
-
     const { x, y } = this.getPointerPos(e);
     this.handlePointerMove(x, y);
   };
@@ -361,6 +372,7 @@ export default class extends PureComponent {
     if (this.props.disabled) return;
 
     this.lazy.update({ x, y });
+
     const isDisabled = !this.lazy.isEnabled();
 
     if (
@@ -403,6 +415,8 @@ export default class extends PureComponent {
     let p1 = points[0];
     let p2 = points[1];
 
+    if(!p1 || !p2) return;
+
     this.ctx.temp.moveTo(p2.x, p2.y);
     this.ctx.temp.beginPath();
 
@@ -421,7 +435,7 @@ export default class extends PureComponent {
     this.ctx.temp.stroke();
   };
 
-  saveLine = ({ brushColor, brushRadius } = {}) => {
+  saveLine = ({ brushColor, brushRadius, abortOnChange } = {}) => {
     if (this.points.length < 2) return;
 
     // Save as new line
@@ -443,7 +457,9 @@ export default class extends PureComponent {
     // Clear the temporary line-drawing canvas
     this.ctx.temp.clearRect(0, 0, width, height);
 
-    this.triggerOnChange();
+    if(!abortOnChange) {
+      this.triggerOnChange();
+    }
   };
 
   triggerOnChange = () => {
