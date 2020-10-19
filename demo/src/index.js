@@ -7,8 +7,8 @@ import classNames from "./index.css";
 class Demo extends Component {
   state = {
     color: "#ffc600",
-    width: 400,
-    height: 400,
+    width: 1200,
+    height: 1200,
     brushRadius: 1,
     lazyRadius: 12
   };
@@ -24,10 +24,6 @@ class Demo extends Component {
 
   updateWidth = ({ target }) => {
     this.setState({ width: target.innerWidth / 2})
-  }
-
-  onChange = () => {
-    console.log('onChange')
   }
 
   render() {
@@ -48,7 +44,7 @@ class Demo extends Component {
           default values.
         </p>
         <p>Try it out! Draw on this white canvas:</p>
-        <CanvasDraw canvasWidth={this.state.width} />
+        <CanvasDraw brushColor="#f00" lazyRadius={0} brushRadius={1} canvasWidth={this.state.width} />
         <h2>Custom Brush-Color</h2>
         <p>
           Let's spice things up by using custom brush colors{" "}

@@ -88,7 +88,10 @@ export default class extends PureComponent {
     this.canvas = {};
     this.ctx = {};
 
-    this.catenary = new Catenary();
+    this.catenary = new Catenary({
+      segments: 20,
+      iterationLimit: 40,
+    });
 
     this.points = [];
     this.lines = [];
@@ -104,7 +107,7 @@ export default class extends PureComponent {
   componentDidMount() {
     this.lazy = new LazyBrush({
       radius: this.props.lazyRadius * window.devicePixelRatio,
-      enabled: true,
+      enabled: false,
       initialPoint: {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2
@@ -368,6 +371,7 @@ export default class extends PureComponent {
     if (this.props.disabled) return;
 
     this.lazy.update({ x, y });
+
     const isDisabled = !this.lazy.isEnabled();
 
     if (

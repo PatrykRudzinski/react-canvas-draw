@@ -339,6 +339,8 @@ var _default = (_temp = _class = function (_PureComponent) {
       var p1 = points[0];
       var p2 = points[1];
 
+      if (!p1 || !p2) return;
+
       _this.ctx.temp.moveTo(p2.x, p2.y);
       _this.ctx.temp.beginPath();
 
